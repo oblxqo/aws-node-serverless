@@ -5,6 +5,7 @@
   "main": "serverless.ts",
   "scripts": {
     "deploy": "sls deploy",
+    "build": "node esbuild.config.js",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "prettier": "prettier src --write"
