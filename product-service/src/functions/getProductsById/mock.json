@@ -1,0 +1,9 @@
+{
+	"headers": {
+		"Content-Type": "application/json"
+	},
+	"body": null,
+	"pathParameters": {
+		"productId": "c293793b-7b83-4777-b9a0-c5d5f2fc92eb"
+	}
+}
