@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: AWS Shop Cloudfront Serverless API
+  version: 0.0.1
+servers:
+  - url: https://2ao05x02fd.execute-api.us-east-1.amazonaws.com/dev
+    description: Dev stage AWS API Gateway
+paths:
+  # Products
+  /products:
+    get:
+      summary: Get list of products
+      tags: [ Products ]
+      operationId: getProductsList
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponseDto'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /products/{productId}:
+    get:
+      summary: Get product by Id
+      tags: [ Products ]
+      operationId: getProductsById
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Specify product ID
+          example: 'e91e12a4-4ecc-493c-9933-dea7ba769029'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponseDto'
+        '404':
+          description: Product Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+
+components:
+  schemas:
+    ProductsResponseDto:
+      type: object
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDto'
+    ProductResponseDto:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/ProductDto'
+    ProductDto:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - price
+      properties:
+        id:
+          type: string
+          example: e91e12a4-4ecc-493c-9933-dea7ba769029
+        title:
+          type: string
+          example: Arctiq
+        description:
+          type: string
+          example: Anim irure fugiat sit labore in dolore irure veniam nulla.
+        price:
+          type: number
+          example: 1990.52
+    NotFoundError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: 'Item not found'
+    InternalServerError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: 'Internal server error'
