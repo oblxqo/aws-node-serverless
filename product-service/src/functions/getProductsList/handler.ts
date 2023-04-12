@@ -8,9 +8,11 @@ import { ERROR_CODES } from '@constants/error-codes';
 import { StatusCode } from '@enums/status-code.enum';
 import { productService } from '@services/index';
 
-export const getProductsList: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async () => {
+export const getProductsList: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
+  console.log('In getProductsList >>> request: event ', event);
+
   try {
-    const products = await productService.getAllProducts();
+    const products = await productService.getProductsWithStocks();
 
     if (!products.length) {
       return formatJSONResponse(

@@ -1,1 +1,1 @@
-export type ResponseHeader = {[header: string]: string | number | boolean};
+export type ResponseHeader = { [header: string]: string | number | boolean };
