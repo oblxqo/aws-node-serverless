@@ -1,10 +1,11 @@
 export default {
-	type: 'object',
-	properties: {
-		id: {type: 'string'},
-		title: {type: 'string'},
-		description: {type: 'string'},
-		price: {type: 'number'},
-		count: {type: 'number'}
-	}
+  type: 'array',
+  items: {
+    type: 'string',
+    id: 'string',
+    count: 'number',
+    description: 'string',
+    price: 'number',
+    title: 'string',
+  },
 } as const;

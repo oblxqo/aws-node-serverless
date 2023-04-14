@@ -1,6 +1,7 @@
 import type { AWS } from '@serverless/typescript';
 
 import { getProductsById, getProductsList, createProduct } from "@functions/index";
+// import vpcConfig from 'vpc.config.json';
 
 const serverlessConfiguration: AWS = {
   service: 'product-service',
@@ -23,6 +24,10 @@ const serverlessConfiguration: AWS = {
       PRODUCTS_TABLE: 'products',
       STOCKS_TABLE: 'stocks',
     },
+    // vpc: {
+    //   subnetIds: vpcConfig.SUBNET_IDS,
+    //   securityGroupIds: vpcConfig.SECURITY_GROUP_IDS,
+    // },
     iamRoleStatements: [
       {
         Effect: 'Allow',
@@ -47,7 +52,7 @@ const serverlessConfiguration: AWS = {
       bundle: true,
       minify: false,
       sourcemap: true,
-      exclude: ['aws-sdk'],
+      exclude: ['aws-sdk', 'pg-native'],
       target: 'node14',
       define: { 'require.resolve': undefined },
       platform: 'node',

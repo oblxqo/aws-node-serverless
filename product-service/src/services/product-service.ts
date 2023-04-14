@@ -3,17 +3,25 @@ import { DynamoClientService } from "@services/dynamo-client-service";
 import { TablesConfig } from "../configs/tables.config";
 import { mapKeyValueToObject } from "../helpers/convert-data.helper";
 
-export class ProductService {
-  public client;
+// import { RdsClientService } from "@services/rds-client-service";
 
+export class ProductService {
+  public client: DynamoClientService;
+  // public client: RdsClientService;
+
+  // constructor(client: RdsClientService) {
   constructor(client: DynamoClientService) {
     this.client = client;
   }
 
-  public async getProductsWithStocks(): Promise<Product[]> {
+  public async getProductsWithStocks(): Promise<any> {
     try {
+      // Dynamo
       const products = await this.client.getAllTableItems(TablesConfig.PRODUCTS_TABLE);
       const stocks = await this.client.getAllTableItems(TablesConfig.STOCKS_TABLE);
+
+      // PG
+      // const joinedTables = await this.client.getAllTableItems();
 
       const stocksObj = mapKeyValueToObject(stocks, 'product_id');
 
@@ -21,18 +29,30 @@ export class ProductService {
         acc.push({ ...product, count: stocksObj[product.id]?.count || 0 });
         return acc;
       }, [])
-      console.log('In getProductsWithStocks joinedTables', joinedTables);
+      console.log('In getProductsWithStocks >>> joinedTables', joinedTables);
       return joinedTables;
     } catch (err) {
       throw new Error(err);
     }
   }
 
-  public async getProductById(id: string): Promise<Product> {
-    const product = await this.client.getItemById(TablesConfig.PRODUCTS_TABLE, id);
-    const stock = await this.client.getItemById(TablesConfig.STOCKS_TABLE, id, 'product_id');
+  public async getProductById(id: string): Promise<any> {
+    try {
+      // Dynamo
+      const product = await this.client.getItemById(TablesConfig.PRODUCTS_TABLE, id);
+      const stock = await this.client.getItemById(TablesConfig.STOCKS_TABLE, id, 'product_id');
 
-    return { ...product, count: stock.count };
+      // PG
+      // const product = await this.client.getItemById(id);
+      console.log('In getProductById >>> product: ', product);
+
+      if (!product || !stock) return;
+
+      // return product;
+      return { ...product, count: stock.count };
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   public async createProduct(productData): Promise<Product> {

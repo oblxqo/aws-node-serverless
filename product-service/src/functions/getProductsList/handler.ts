@@ -2,13 +2,12 @@ import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
 import { formatJSONResponse } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
 
-import schema from './schema';
 import { MESSAGES } from '@constants/messages';
 import { ERROR_CODES } from '@constants/error-codes';
 import { StatusCode } from '@enums/status-code.enum';
 import { productService } from '@services/index';
 
-export const getProductsList: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
+export const getProductsList: ValidatedEventAPIGatewayProxyEvent<unknown> = async event => {
   console.log('In getProductsList >>> request: event ', event);
 
   try {

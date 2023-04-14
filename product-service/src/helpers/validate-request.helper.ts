@@ -21,6 +21,7 @@ export const validateRequest = async (params: EventSchemaParams) => {
     throw {
       statusCode: StatusCode.BAD_REQUEST,
       message,
+      errorInstance: error
     };
   }
 };

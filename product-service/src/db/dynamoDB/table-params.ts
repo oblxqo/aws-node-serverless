@@ -21,8 +21,8 @@ export const productTableParams = {
     }
   ],
   "ProvisionedThroughput": {
-    "ReadCapacityUnits": 5,
-    "WriteCapacityUnits": 5,
+    "ReadCapacityUnits": 1,
+    "WriteCapacityUnits": 1,
   }
 };
 
@@ -49,7 +49,7 @@ export const stockTableParams = {
     }
   ],
   "ProvisionedThroughput": {
-    "ReadCapacityUnits": 5,
-    "WriteCapacityUnits": 5,
+    "ReadCapacityUnits": 1,
+    "WriteCapacityUnits": 1,
   }
 };
