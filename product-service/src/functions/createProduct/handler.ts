@@ -27,7 +27,7 @@ export const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof ProductSch
       return formatJSONResponse(
         {
           status: ERROR_CODES.validationError,
-          message: error.message || STATUS_MESSAGES[StatusCode.BAD_REQUEST]
+          message: error.message
         },
         StatusCode.BAD_REQUEST
       );
@@ -35,7 +35,7 @@ export const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof ProductSch
     return formatJSONResponse(
       {
         status: ERROR_CODES.internalServerError,
-        message: error.ValidationError || error.message || STATUS_MESSAGES[StatusCode.ERROR]
+        message: error.message || STATUS_MESSAGES[StatusCode.ERROR]
       },
       StatusCode.ERROR
     );
