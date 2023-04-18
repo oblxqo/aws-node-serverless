@@ -1,6 +1,7 @@
 export enum Status {
-	SUCCESS = 'success',
-	ERROR = 'error',
-	NOT_FOUND = 'not found',
-	BAD_REQUEST = 'bad request'
+  SUCCESS = 'Success',
+  CREATED = 'Created',
+  ERROR = 'Error',
+  NOT_FOUND = 'Not found',
+  BAD_REQUEST = 'Bad request'
 }

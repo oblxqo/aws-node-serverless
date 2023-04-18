@@ -11,6 +11,7 @@ import { productService } from '@services/index';
 export const getProductsById: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
   const { productId } = event.pathParameters;
 
+  console.log('In getProductsById >>> request: event ', event);
   try {
     const product = await productService.getProductById(productId);
 

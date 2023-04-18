@@ -9,3 +9,5 @@ jspm_packages
 .esbuild
 
 /dist
+.env
+./vpc.config.json
