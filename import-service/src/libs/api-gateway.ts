@@ -7,9 +7,9 @@ type ValidatedAPIGatewayProxyEvent<S> = Omit<APIGatewayProxyEvent, 'body'> & { b
 export type ValidatedEventAPIGatewayProxyEvent<S> = Handler<ValidatedAPIGatewayProxyEvent<S>, APIGatewayProxyResult>;
 
 export const formatJSONResponse = (response: Record<string, unknown>, statusCode = StatusCode.OK) => {
-	return {
-		statusCode,
-		headers: RESPONSE_HEADERS,
-		body: JSON.stringify(response)
-	};
+  return {
+    statusCode,
+    headers: RESPONSE_HEADERS,
+    body: JSON.stringify(response)
+  };
 };

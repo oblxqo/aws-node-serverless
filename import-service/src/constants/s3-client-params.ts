@@ -4,5 +4,5 @@ export const s3ClientParams = {
   UPLOAD_BASE_PATH: 'uploaded/',
   PARSE_BASE_PATH: 'parsed/',
   EXPIRE_PERIOD: 60,
-  CONTENT_TYPE_CSV: 'text/csv',
-}
+  CONTENT_TYPE_CSV: 'text/csv'
+};
