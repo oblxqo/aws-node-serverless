@@ -12,11 +12,13 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export const importProductsFile: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
 	console.log('In importProductsFile >>> request: event ', event);
-	console.log('In importProductsFile >>> request: event.queryStringParameters ', event.queryStringParameters);
+
 	const s3Client = new S3Client({ region: s3ClientParams.REGION });
 	const fileName = event.queryStringParameters.name;
 
-	if (!fileName) {
+	console.log('In importProductsFile >>> fileName ', fileName);
+
+	if (!(typeof fileName === 'string') || !fileName.match('^.+\\.(csv)$')) {
 		return formatJSONResponse(
 			{
 				status: ERROR_CODES.invalidFileFormatError,
@@ -34,7 +36,7 @@ export const importProductsFile: ValidatedEventAPIGatewayProxyEvent<typeof schem
 		});
 		const putSignedUrl = await getSignedUrl(s3Client, putCommand, { expiresIn: s3ClientParams.EXPIRE_PERIOD });
 
-		console.log('In importProductsFile putSignedUrl', putSignedUrl);
+		console.log('In importProductsFile >>> putSignedUrl', putSignedUrl);
 
 		return formatJSONResponse({ payload: putSignedUrl });
 	} catch (error) {
