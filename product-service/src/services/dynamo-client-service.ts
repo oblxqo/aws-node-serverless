@@ -9,12 +9,12 @@ import {
   TransactWriteItemsCommandInput,
   waitUntilTableExists,
   waitUntilTableNotExists
-} from "@aws-sdk/client-dynamodb";
-import { PutCommand, QueryCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { Product } from "@models/product.model";
-import { v4 as uuidv4 } from "uuid";
-import { TablesConfig } from "../configs/tables.config";
-import { WaiterResult } from "@aws-sdk/util-waiter";
+} from '@aws-sdk/client-dynamodb';
+import { PutCommand, QueryCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { Product } from '@models/product.model';
+import { v4 as uuidv4 } from 'uuid';
+import { WaiterResult } from '@aws-sdk/util-waiter';
+import { ProductServiceConfig } from '../configs/product-service.config';
 
 export class DynamoClientService {
   public ddbClient: DynamoDBClient;
@@ -24,14 +24,14 @@ export class DynamoClientService {
   }
 
   public async createTable(tableInput: CreateTableCommandInput): Promise<DeleteTableCommandOutput> {
-    if (!await this.isTableExist(tableInput.TableName)) {
+    if (!(await this.isTableExist(tableInput.TableName))) {
       try {
         return await this.ddbClient.send(new CreateTableCommand(tableInput));
       } catch (err) {
         throw new Error(err);
       }
     }
-  };
+  }
 
   public async deleteTable(tableName: string): Promise<DeleteTableCommandOutput> {
     try {
@@ -40,7 +40,7 @@ export class DynamoClientService {
           new DeleteTableCommand({
             TableName: tableName
           })
-        )
+        );
       }
     } catch (err) {
       throw new Error(err);
@@ -48,21 +48,27 @@ export class DynamoClientService {
   }
 
   public async waitUntilTableExists(tableName: string): Promise<WaiterResult> {
-    return await waitUntilTableExists({
-      client: this.ddbClient,
-      maxWaitTime: 30,
-    }, {
-      TableName: tableName
-    })
+    return await waitUntilTableExists(
+      {
+        client: this.ddbClient,
+        maxWaitTime: 30
+      },
+      {
+        TableName: tableName
+      }
+    );
   }
 
   public async waitUntilTableNotExists(tableName: string): Promise<WaiterResult> {
-    return await waitUntilTableNotExists({
-      client: this.ddbClient,
-      maxWaitTime: 25,
-    }, {
-      TableName: tableName
-    })
+    return await waitUntilTableNotExists(
+      {
+        client: this.ddbClient,
+        maxWaitTime: 25
+      },
+      {
+        TableName: tableName
+      }
+    );
   }
 
   public async isTableExist(tableName: string): Promise<boolean> {
@@ -71,7 +77,7 @@ export class DynamoClientService {
         new DescribeTableCommand({
           TableName: tableName
         })
-      )
+      );
       return true;
     } catch {
       return false;
@@ -84,7 +90,7 @@ export class DynamoClientService {
       TransactItems: [
         {
           Put: {
-            TableName: TablesConfig.PRODUCTS_TABLE,
+            TableName: ProductServiceConfig.PRODUCTS_TABLE,
             Item: {
               id: { S: id },
               title: { S: title },
@@ -98,7 +104,7 @@ export class DynamoClientService {
         },
         {
           Put: {
-            TableName: TablesConfig.STOCKS_TABLE,
+            TableName: ProductServiceConfig.STOCKS_TABLE,
             Item: {
               id: { S: stockId },
               product_id: { S: id },
@@ -110,12 +116,10 @@ export class DynamoClientService {
       ]
     };
     try {
-      await this.ddbClient.send(
-        new TransactWriteItemsCommand(transaction)
-      )
+      await this.ddbClient.send(new TransactWriteItemsCommand(transaction));
       return { id, title, description, price, count };
     } catch (err) {
-      console.log("In transactWriteItemsPut >>> error: ", err);
+      console.log('In transactWriteItemsPut >>> error: ', err);
       throw new Error(err);
     }
   }
@@ -124,12 +128,12 @@ export class DynamoClientService {
     try {
       const result = await this.ddbClient.send(
         new ScanCommand({
-          TableName: tableName,
+          TableName: tableName
         })
       );
       return result.Items;
     } catch (err) {
-      console.log("In getAllTableItems >>> error: ", err);
+      console.log('In getAllTableItems >>> error: ', err);
       throw new Error(err);
     }
   }
@@ -138,17 +142,16 @@ export class DynamoClientService {
     try {
       const result = await this.ddbClient.send(
         new QueryCommand({
-            TableName: tableName,
-            ExpressionAttributeValues: {
-              ":keyValue": keyValue
-            },
-            KeyConditionExpression: `${key} = :keyValue`
-          }
-        )
+          TableName: tableName,
+          ExpressionAttributeValues: {
+            ':keyValue': keyValue
+          },
+          KeyConditionExpression: `${key} = :keyValue`
+        })
       );
       return result?.Items[0];
     } catch (err) {
-      console.log("In getItemById >>> error: ", err);
+      console.log('In getItemById >>> error: ', err);
       throw new Error(err);
     }
   }
@@ -158,7 +161,7 @@ export class DynamoClientService {
       await this.ddbClient.send(
         new PutCommand({
           TableName: tableName,
-          Item: item,
+          Item: item
         })
       );
     } catch (err) {
