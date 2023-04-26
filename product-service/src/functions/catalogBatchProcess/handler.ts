@@ -13,19 +13,19 @@ export const catalogBatchProcess: SQSHandler = async event => {
 
   const eventProcessingPromises = event.Records.map(async record => {
     try {
-      const productBody = JSON.parse(record.body);
-      await validateRequest({ event: record, schema: ProductSchema });
+      const coercedProductBody = await validateRequest({ event: record, schema: ProductSchema });
 
       console.log('In catalogBatchProcess >>> record: ', record);
+      console.log('In catalogBatchProcess >>> coercedProductBody: ', coercedProductBody);
 
-      const product = await productService.createProduct(productBody);
+      const product = await productService.createProduct(coercedProductBody);
 
       console.log('In catalogBatchProcess >>> new product is created: ', product);
 
       const publishCommand = new PublishCommand({
         TopicArn: ProductServiceConfig.SNS_ARN,
         Subject: 'New item is added to Product table!',
-        Message: `New item is added to Product table. Item: ${JSON.stringify(product)}`,
+        Message: `New item is added to Product table. Item: ${JSON.stringify(product)}`
       });
       await snsClient.send(publishCommand);
     } catch (error) {
@@ -36,7 +36,7 @@ export const catalogBatchProcess: SQSHandler = async event => {
   await Promise.all(eventProcessingPromises);
 
   if (batchItemFailures.length) {
-    const publishCommand = new PublishCommand({
+    const publishFailureCommand = new PublishCommand({
       TopicArn: ProductServiceConfig.SNS_ARN,
       Subject: 'FAILURE: In catalogBatchProcess!',
       Message: `A failure occurred while handling the 'catalogBatchProcess' event at the following elements: ${JSON.stringify(batchItemFailures)}`,
@@ -47,7 +47,7 @@ export const catalogBatchProcess: SQSHandler = async event => {
         }
       }
     });
-    await snsClient.send(publishCommand);
+    await snsClient.send(publishFailureCommand);
   }
 
   return { batchItemFailures };

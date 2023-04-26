@@ -19,7 +19,10 @@ export const validateRequest = async (params: EventSchemaParams) => {
     eventBody = JSON.parse(event.body);
   }
   try {
-    return await schema.validate(eventBody, validateOptions);
+    const coercedData = await schema.cast(eventBody);
+    console.info('In validateRequest >>> coercedData: ', coercedData);
+    await schema.validate(coercedData, validateOptions);
+    return coercedData;
   } catch (error) {
     const message = error.message || STATUS_MESSAGES[StatusCode.BAD_REQUEST];
     console.error(`In validateRequest >>> error message: ${message}`);

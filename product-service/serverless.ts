@@ -75,7 +75,8 @@ const serverlessConfiguration: AWS = {
       SQSQueue: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          QueueName: 'catalogItemsQueue'
+          QueueName: 'catalogItemsQueue',
+          ReceiveMessageWaitTimeSeconds: 5
         }
       },
       SNSTopic: {

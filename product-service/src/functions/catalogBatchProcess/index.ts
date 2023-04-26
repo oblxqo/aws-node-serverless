@@ -6,6 +6,7 @@ export default {
     {
       sqs: {
         batchSize: 5,
+        maximumBatchingWindow: 5,
         arn: {
           'Fn::GetAtt': ['SQSQueue', 'Arn']
         }

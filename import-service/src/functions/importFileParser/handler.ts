@@ -5,6 +5,10 @@ import { s3ClientParams } from '@constants/s3-client-params';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { importServiceConfig } from '../../configs/import-service.config';
 
+const csvOptions = {
+  mapHeaders: ({ header }) => header.toLowerCase(),
+}
+
 export const importFileParser: S3Handler = async event => {
   console.log('In importProductsFile >>> request: event ', event);
   const s3Client = new S3Client({ region: s3ClientParams.REGION });
@@ -30,7 +34,7 @@ export const importFileParser: S3Handler = async event => {
       new Promise((resolve, reject) => {
         const chunks = [];
         stream
-          .pipe(csvParser())
+          .pipe(csvParser(csvOptions))
           .on('data', chunk => sendToQueue(JSON.stringify(chunk), importServiceConfig.SQS_URL))
           .on('error', reject)
           .on('end', () => resolve(chunks));
@@ -68,6 +72,7 @@ export const importFileParser: S3Handler = async event => {
     }
   } catch (error) {
     console.error('Error appears: ', error);
+    throw new Error(error);
   }
 };
 
