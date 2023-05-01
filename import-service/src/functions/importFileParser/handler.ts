@@ -2,10 +2,17 @@ import { CopyObjectCommand, DeleteObjectCommand, GetObjectCommand, S3Client } fr
 import { S3Handler } from 'aws-lambda/trigger/s3';
 import csvParser from 'csv-parser';
 import { s3ClientParams } from '@constants/s3-client-params';
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import { importServiceConfig } from '../../configs/import-service.config';
+
+const csvOptions = {
+  mapHeaders: ({ header }) => header.toLowerCase(),
+}
 
 export const importFileParser: S3Handler = async event => {
   console.log('In importProductsFile >>> request: event ', event);
   const s3Client = new S3Client({ region: s3ClientParams.REGION });
+  const sqsClient = new SQSClient({ region: s3ClientParams.REGION });
 
   try {
     const readFile = async (bucket, key) => {
@@ -16,12 +23,19 @@ export const importFileParser: S3Handler = async event => {
       const getFileCommand = new GetObjectCommand(params);
       return await s3Client.send(getFileCommand);
     };
+    const sendToQueue = async (message, queueUrl) => {
+      const sendMessageCommand = new SendMessageCommand({
+        MessageBody: message,
+        QueueUrl: queueUrl
+      });
+      await sqsClient.send(sendMessageCommand);
+    };
     const parseStream = stream =>
       new Promise((resolve, reject) => {
         const chunks = [];
         stream
-          .pipe(csvParser())
-          .on('data', chunk => chunks.push(chunk))
+          .pipe(csvParser(csvOptions))
+          .on('data', chunk => sendToQueue(JSON.stringify(chunk), importServiceConfig.SQS_URL))
           .on('error', reject)
           .on('end', () => resolve(chunks));
       });
@@ -58,6 +72,7 @@ export const importFileParser: S3Handler = async event => {
     }
   } catch (error) {
     console.error('Error appears: ', error);
+    throw new Error(error);
   }
 };
 

@@ -1,6 +1,6 @@
 import type { AWS } from '@serverless/typescript';
 
-import { getProductsById, getProductsList, createProduct } from "@functions/index";
+import { getProductsById, getProductsList, createProduct, catalogBatchProcess } from '@functions/index';
 // import vpcConfig from 'vpc.config.json';
 
 const serverlessConfiguration: AWS = {
@@ -16,13 +16,19 @@ const serverlessConfiguration: AWS = {
     runtime: 'nodejs14.x',
     apiGateway: {
       minimumCompressionSize: 1024,
-      shouldStartNameWithService: true,
+      shouldStartNameWithService: true
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
       PRODUCTS_TABLE: 'products',
       STOCKS_TABLE: 'stocks',
+      SQS_URL: {
+        Ref: 'SQSQueue'
+      },
+      SNS_ARN: {
+        Ref: 'SNSTopic'
+      }
     },
     // vpc: {
     //   subnetIds: vpcConfig.SUBNET_IDS,
@@ -38,14 +44,84 @@ const serverlessConfiguration: AWS = {
           'dynamodb:GetItem',
           'dynamodb:PutItem',
           'dynamodb:UpdateItem',
-          'dynamodb:DeleteItem',
+          'dynamodb:DeleteItem'
         ],
-        Resource: "arn:aws:dynamodb:us-east-1:*:table/*"
+        Resource: 'arn:aws:dynamodb:us-east-1:*:table/*'
+      },
+      {
+        Effect: 'Allow',
+        Action: ['sqs:*'],
+        Resource: [
+          {
+            'Fn::GetAtt': ['SQSQueue', 'Arn']
+          }
+        ]
+      },
+      {
+        Effect: 'Allow',
+        Action: ['sns:*'],
+        Resource: [
+          {
+            Ref: 'SNSTopic'
+          }
+        ]
       }
     ]
   },
   // import the function via paths
-  functions: { getProductsList, getProductsById, createProduct },
+  functions: { getProductsList, getProductsById, createProduct, catalogBatchProcess },
+  resources: {
+    Resources: {
+      SQSQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: 'catalogItemsQueue',
+          ReceiveMessageWaitTimeSeconds: 5
+        }
+      },
+      SNSTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: 'createProductTopic'
+        }
+      },
+      SNSDevEmailSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: '${env:SUBSCRIPTION_EMAIL_DEV}',
+          Protocol: 'email',
+          TopicArn: {
+            Ref: 'SNSTopic'
+          }
+        }
+      },
+      SNSDebugEmailSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: '${env:SUBSCRIPTION_EMAIL_DEBUG}',
+          Protocol: 'email',
+          TopicArn: {
+            Ref: 'SNSTopic'
+          },
+          FilterPolicy: {
+            error: ['batchItemFailures']
+          }
+        }
+      }
+    },
+    Outputs: {
+      SQSQueueArn: {
+        Value: {
+          'Fn::GetAtt': ['SQSQueue', 'Arn']
+        }
+      },
+      SQSQueue: {
+        Value: {
+          Ref: 'SQSQueue'
+        }
+      }
+    }
+  },
   package: { individually: true },
   custom: {
     esbuild: {
@@ -56,9 +132,9 @@ const serverlessConfiguration: AWS = {
       target: 'node14',
       define: { 'require.resolve': undefined },
       platform: 'node',
-      concurrency: 10,
-    },
-  },
+      concurrency: 10
+    }
+  }
 };
 
 module.exports = serverlessConfiguration;
