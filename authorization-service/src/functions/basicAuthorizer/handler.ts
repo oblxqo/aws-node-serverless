@@ -8,7 +8,7 @@ export const basicAuthorizer: APIGatewayTokenAuthorizerHandler = async event => 
   console.log('In basicAuthorizer >>> request: event ', event);
 
   const { authorizationToken, methodArn } = event;
-  const basicAuthRegex = /^Basic ((?:\.?[A-Za-z0-9-_]+){3})$/gm;
+  const basicAuthRegex = /^Basic [A-Za-z0-9\\+=]+$/gm;
 
   if (!authorizationToken.match(basicAuthRegex)) {
     throw new Error(MESSAGES.UNAUTHORIZED_AWS);
